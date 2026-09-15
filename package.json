@@ -2,9 +2,11 @@
   "name": "hs-task-timer",
   "displayName": "HS Task Timer",
   "description": "Track time spent on tasks",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "publisher": "hrvanovicm",
   "license": "MIT",
+  "icon": "images/logo.png",
+  
   "engines": {
     "vscode": "^1.85.0"
   },

@@ -1,3 +1,5 @@
+<img src="images/logo.png" alt="HS Task Timer" width="64" align="right">
+
 # HS Task Timer
 
 Track time spent on tasks and meetings, right inside VS Code. Still in beta.
