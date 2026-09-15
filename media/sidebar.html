@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'none'; style-src __CSP_SOURCE__ 'unsafe-inline'; script-src __CSP_SOURCE__;" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="__CSS_URI__" />
+</head>
+<body class="p-2">
+  <div class="mb-2 flex gap-1 border-b border-edge">
+    <button id="tabCurrentBtn" class="tab active">Current</button>
+    <button id="tabListBtn" class="tab">List</button>
+  </div>
+
+  <div id="tabCurrent">
+    <div class="mb-2 flex items-center gap-1.5">
+      <input type="date" id="day" class="flex-1" />
+      <button id="syncBtn" class="secondary">Export</button>
+    </div>
+
+    <div id="currentRow" class="mb-2">
+      <label for="currentInput" class="mb-0.5 block text-[0.85em] text-muted">Currently doing</label>
+      <div class="combobox relative">
+        <div class="flex items-center gap-1">
+          <input type="text" id="currentInput" autocomplete="off" placeholder="Select task or meeting..." class="flex-1" />
+          <button id="clearBtn" class="icon-btn" title="Stop tracking and clear">×</button>
+        </div>
+        <div id="comboList" class="absolute left-0 right-0 top-full z-20 mt-0.5 hidden max-h-[200px] overflow-y-auto rounded-[2px] border border-edge bg-input"></div>
+      </div>
+      <button id="pauseBtn" class="secondary mt-1.5 w-full">Pause</button>
+    </div>
+
+    <div id="dueSection" class="mb-3">
+      <div class="section-title">Due today / overdue</div>
+      <div id="dueList"></div>
+    </div>
+
+    <div id="sections"></div>
+    <div id="stats" class="stats hidden"></div>
+  </div>
+
+  <div id="tabList" class="hidden">
+    <div class="mb-2 flex gap-1.5">
+      <button id="newTaskBtn" class="secondary">New task</button>
+      <button id="newMeetingBtn" class="secondary">New meeting</button>
+    </div>
+    <input type="search" id="listSearch" placeholder="Search..." />
+    <label class="my-1.5 flex items-center gap-1.5 text-[0.9em] text-muted">
+      <input type="checkbox" id="showClosed" class="w-auto" /> Show closed
+    </label>
+    <div id="listItems"></div>
+  </div>
+
+  <div id="detailView" class="hidden"></div>
+  <div id="newView" class="hidden"></div>
+  <div id="syncView" class="hidden"></div>
+
+  <datalist id="branchList"></datalist>
+
+  <script src="__SCRIPT_URI_UTIL__"></script>
+  <script src="__SCRIPT_URI_STATE__"></script>
+  <script src="__SCRIPT_URI_DOM__"></script>
+  <script src="__SCRIPT_URI_COMPONENTS/FORM__"></script>
+  <script src="__SCRIPT_URI_COMPONENTS/TABS__"></script>
+  <script src="__SCRIPT_URI_COMPONENTS/TRACKER__"></script>
+  <script src="__SCRIPT_URI_COMPONENTS/DUE__"></script>
+  <script src="__SCRIPT_URI_COMPONENTS/SECTIONS__"></script>
+  <script src="__SCRIPT_URI_COMPONENTS/STATS__"></script>
+  <script src="__SCRIPT_URI_COMPONENTS/LIST__"></script>
+  <script src="__SCRIPT_URI_COMPONENTS/ENTRY-FORM__"></script>
+  <script src="__SCRIPT_URI_COMPONENTS/ITEM-FORM__"></script>
+  <script src="__SCRIPT_URI_COMPONENTS/EXPORT__"></script>
+  <script src="__SCRIPT_URI_MAIN__"></script>
+</body>
+</html>

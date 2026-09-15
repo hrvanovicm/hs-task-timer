@@ -1,0 +1,232 @@
+@import "tailwindcss";
+
+@source "./sidebar.html";
+@source "./*.js";
+@source "./components/*.js";
+
+@theme inline {
+  --color-fg: var(--vscode-foreground);
+  --color-muted: var(--vscode-descriptionForeground);
+  --color-edge: var(--vscode-panel-border, rgba(128, 128, 128, 0.35));
+  --color-hover: var(--vscode-list-hoverBackground);
+  --color-input: var(--vscode-input-background);
+  --color-button: var(--vscode-button-background);
+  --color-button-hover: var(--vscode-button-hoverBackground);
+  --color-button-fg: var(--vscode-button-foreground);
+  --color-secondary: var(--vscode-button-secondaryBackground);
+  --color-secondary-hover: var(--vscode-button-secondaryHoverBackground);
+  --color-secondary-fg: var(--vscode-button-secondaryForeground);
+  --color-danger: var(--vscode-inputValidation-errorBackground, rgba(255, 0, 0, 0.2));
+  --color-danger-fg: var(--vscode-inputValidation-errorForeground, var(--vscode-foreground));
+  --color-focus: var(--vscode-focusBorder, var(--vscode-foreground));
+}
+
+@layer base {
+  body {
+    @apply text-fg;
+    font-family: var(--vscode-font-family);
+    font-size: var(--vscode-font-size);
+  }
+
+  input[type="date"],
+  input[type="text"],
+  input[type="url"],
+  input[type="time"],
+  input[type="search"],
+  input[type="number"],
+  input[type="datetime-local"],
+  select,
+  textarea {
+    @apply w-full rounded-[2px] border border-edge bg-input px-1.5 py-1 text-fg;
+  }
+
+  textarea {
+    @apply min-h-[60px] resize-y;
+  }
+
+  button {
+    @apply cursor-pointer rounded-[2px] border-0 bg-button px-2 py-1 text-button-fg;
+  }
+
+  button:hover {
+    @apply bg-button-hover;
+  }
+}
+
+@layer components {
+  .secondary {
+    @apply bg-secondary text-secondary-fg hover:bg-secondary-hover;
+  }
+
+  .danger {
+    @apply bg-danger text-danger-fg hover:bg-danger;
+  }
+
+  .icon-btn,
+  .add-btn {
+    @apply cursor-pointer bg-transparent px-1.5 py-0 text-[0.95em] leading-[1.4] text-muted hover:bg-hover hover:text-fg;
+  }
+
+  .tab {
+    @apply cursor-pointer border-b-2 border-transparent bg-transparent px-2.5 py-1 text-muted;
+  }
+
+  .tab.active {
+    @apply border-focus text-fg;
+  }
+
+  .combo-option {
+    @apply cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap px-2 py-1;
+  }
+
+  .combo-option:hover {
+    @apply bg-hover;
+  }
+
+  .combo-option.head {
+    @apply cursor-default text-[0.8em] uppercase tracking-[0.04em] text-muted;
+  }
+
+  .combo-option.head:hover {
+    @apply bg-transparent;
+  }
+
+  .section {
+    @apply mb-3;
+  }
+
+  .section-head {
+    @apply mt-2 mb-1 flex items-center justify-between border-b border-edge pb-0.5;
+  }
+
+  .section-title {
+    @apply text-[0.8em] uppercase tracking-[0.04em] text-muted;
+  }
+
+  .entry {
+    @apply cursor-pointer rounded-[3px] px-1.5 py-[5px] hover:bg-hover;
+  }
+
+  .entry-line1 {
+    @apply flex items-center gap-1.5;
+  }
+
+  .entry .name {
+    @apply min-w-0 flex-1 truncate;
+  }
+
+  .entry .time {
+    @apply whitespace-nowrap text-[0.85em] tabular-nums text-muted;
+  }
+
+  .entry-line2 {
+    @apply mt-px text-[0.8em] tabular-nums text-muted;
+  }
+
+  .entry.running .name {
+    @apply font-semibold;
+  }
+
+  .empty {
+    @apply px-1.5 py-1 text-[0.9em] italic text-muted;
+  }
+
+  .due-row,
+  .item-row {
+    @apply cursor-pointer rounded-[3px] px-1.5 py-1 hover:bg-hover;
+  }
+
+  .due-row {
+    @apply flex items-center gap-1.5;
+  }
+
+  .due-row .d-name,
+  .item-row .i-name {
+    @apply min-w-0 flex-1 truncate;
+  }
+
+  .due-row .d-deadline {
+    @apply whitespace-nowrap text-[0.8em] tabular-nums text-muted;
+  }
+
+  .item-line1 {
+    @apply flex items-center gap-1.5;
+  }
+
+  .item-row .i-meta {
+    @apply whitespace-nowrap text-[0.8em] text-muted;
+  }
+
+  .item-line2 {
+    @apply mt-px text-[0.8em] tabular-nums text-muted;
+  }
+
+  .item-row.closed .i-name {
+    @apply line-through text-muted;
+  }
+
+  .stats {
+    @apply mt-3 border-t border-edge pt-2 text-[0.9em];
+  }
+
+  .stats table {
+    @apply w-full border-collapse;
+  }
+
+  .stats td {
+    @apply py-[3px];
+  }
+
+  .stats td:first-child {
+    @apply text-muted;
+  }
+
+  .stats td:last-child {
+    @apply text-right tabular-nums;
+  }
+
+  .back-row {
+    @apply mb-2.5;
+  }
+
+  .detail-title {
+    @apply mb-2.5 font-semibold;
+  }
+
+  .field {
+    @apply mb-2;
+  }
+
+  .field label {
+    @apply mb-0.5 block text-[0.85em] text-muted;
+  }
+
+  .field .meta {
+    @apply mt-1 text-[0.85em] text-muted;
+  }
+
+  .field .hint {
+    @apply mt-[3px] text-[0.8em] text-muted;
+  }
+
+  .form-actions {
+    @apply mt-3 flex gap-1.5;
+  }
+
+  .form-actions button {
+    @apply flex-1;
+  }
+
+  .sync-text {
+    @apply min-h-[200px] w-full whitespace-pre text-[0.9em];
+    font-family: var(--vscode-editor-font-family, monospace);
+  }
+}
+
+.dl-today {
+  color: #d9b65a !important;
+}
+
+.dl-overdue {
+  color: #e06c75 !important;
+}

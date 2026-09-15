@@ -1,0 +1,73 @@
+{
+  "name": "hs-task-timer",
+  "displayName": "HS Task Timer",
+  "description": "Track time spent on tasks",
+  "version": "0.1.0",
+  "publisher": "hrvanovicm",
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "taskTimer",
+          "title": "Task Timer",
+          "icon": "media/icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "taskTimer": [
+        {
+          "type": "webview",
+          "id": "taskTimer.view",
+          "name": "Tasks"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "hsTaskTimer.switchTask",
+        "title": "Task Timer: Switch Task"
+      },
+      {
+        "command": "hsTaskTimer.newWork",
+        "title": "Task Timer: Start General Work"
+      },
+      {
+        "command": "hsTaskTimer.newPause",
+        "title": "Task Timer: Start Pause"
+      }
+    ]
+  },
+  "scripts": {
+    "build": "npm run compile && npm run build:css",
+    "build:css": "tailwindcss -i ./media/tailwind.css -o ./media/styles.css --minify",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "watch:css": "tailwindcss -i ./media/tailwind.css -o ./media/styles.css --watch=always",
+    "vscode:prepublish": "npm run build",
+    "vscode:dev": "npm run build && concurrently -k -n tsc,css,vscode -c cyan,magenta,yellow \"npm run watch\" \"npm run watch:css\" \"code --extensionDevelopmentPath=. --wait\""
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.3.3",
+    "@types/node": "^18.19.0",
+    "@types/vscode": "^1.85.0",
+    "concurrently": "^10.0.5",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^5.3.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hrvanovicm/hs-task-timer"
+  }
+}

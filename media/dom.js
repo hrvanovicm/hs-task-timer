@@ -1,0 +1,24 @@
+const tabCurrentEl = document.getElementById('tabCurrent');
+const tabListEl = document.getElementById('tabList');
+const tabCurrentBtn = document.getElementById('tabCurrentBtn');
+const tabListBtn = document.getElementById('tabListBtn');
+const detailView = document.getElementById('detailView');
+const newView = document.getElementById('newView');
+const syncView = document.getElementById('syncView');
+const sectionsEl = document.getElementById('sections');
+const statsEl = document.getElementById('stats');
+const dueListEl = document.getElementById('dueList');
+const dueSectionEl = document.getElementById('dueSection');
+const dayEl = document.getElementById('day');
+const currentRowEl = document.getElementById('currentRow');
+const currentInputEl = document.getElementById('currentInput');
+const comboListEl = document.getElementById('comboList');
+const clearBtnEl = document.getElementById('clearBtn');
+const pauseBtnEl = document.getElementById('pauseBtn');
+const syncBtnEl = document.getElementById('syncBtn');
+const listSearchEl = document.getElementById('listSearch');
+const showClosedEl = document.getElementById('showClosed');
+const listItemsEl = document.getElementById('listItems');
+const branchListEl = document.getElementById('branchList');
+
+const VIEWS = [detailView, newView, syncView];
