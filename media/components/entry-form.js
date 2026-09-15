@@ -10,13 +10,16 @@ const EntryForm = {
 
     let body = '';
     if (entry.type === 'work') {
-      body += Form.field('Time', '<span class="meta">' + escapeHtml(entry.from) + ' \u2013 ' + escapeHtml(entry.to || 'now') + '</span>');
+      const toText = entry.to
+        ? (entry.to.slice(0, 10) === entry.from.slice(0, 10) ? formatTime(entry.to) : formatDate(entry.to))
+        : 'now';
+      body += Form.field('Time', '<span class="meta">' + escapeHtml(formatDate(entry.from)) + ' \u2013 ' + escapeHtml(toText) + '</span>');
     }
     body += Form.field('Title', Form.input('f-name', entry.name));
-    if (task) body += Form.field('Branch', Form.input('f-branch', task.branch, { list: 'branchList' }));
+    if (task) body += Form.field('Branch', BranchAutocomplete.field(task.branch));
     if (isManual) {
-      body += Form.field('From (' + anchor + ')', Form.input('f-from', formatTime(entry.from), { type: 'time' }));
-      body += Form.field('To (' + anchor + ')', Form.input('f-to', entry.to ? formatTime(entry.to) : '', { type: 'time' }), entry.to == null ? 'Leave empty to keep running.' : '');
+      body += Form.field('From (' + formatDate(anchor) + ')', Form.input('f-from', formatTime(entry.from), { type: 'time' }));
+      body += Form.field('To (' + formatDate(anchor) + ')', Form.input('f-to', entry.to ? formatTime(entry.to) : '', { type: 'time' }), entry.to == null ? 'Leave empty to keep running.' : '');
     }
     body += Form.field('URL', Form.input('f-url', entry.url));
     body += Form.field('Notes', Form.textarea('f-notes', entry.notes));
@@ -30,7 +33,8 @@ const EntryForm = {
     buttons.push({ id: 'cancel', cls: 'secondary', label: 'Cancel', onClick: back });
     buttons.push({ id: 'save', label: 'Save', onClick: save });
 
-    Form.render(detailView, entry.type, body, buttons, back);
+    Form.render(detailView, entry.type, body, buttons);
+    if (task) BranchAutocomplete.bind();
 
     function save() {
       const name = Form.read('f-name').trim();
@@ -65,19 +69,18 @@ const EntryForm = {
       newView,
       'Add ' + type,
       nameField +
-        Form.field('From (' + selectedDay + ')', Form.input('f-from', now, { type: 'time' })) +
-        Form.field('To (' + selectedDay + ')', Form.input('f-to', now, { type: 'time' })),
+        Form.field('From (' + formatDate(selectedDay) + ')', Form.input('f-from', now, { type: 'time' })) +
+        Form.field('To (' + formatDate(selectedDay) + ')', Form.input('f-to', now, { type: 'time' })),
       [
         { id: 'cancel', cls: 'secondary', label: 'Cancel', onClick: back },
         { id: 'save', label: 'Add', onClick: save },
       ],
-      back,
     );
 
     function save() {
       const from = Form.read('f-from');
       const to = Form.read('f-to');
-      let name = type;
+      let name = type === 'break' ? 'Break' : type;
       let taskId = null;
       let meetingId = null;
       if (isWork) {

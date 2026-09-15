@@ -1,4 +1,4 @@
-export type EntryType = 'work' | 'pause' | 'meeting';
+export type EntryType = 'work' | 'break' | 'meeting';
 
 export interface Task {
   id: string;
@@ -8,6 +8,7 @@ export interface Task {
   estimate: string | null;
   url: string | null;
   notes: string | null;
+  tags: string[];
   closed: boolean;
   createdAt: number;
 }
@@ -18,6 +19,7 @@ export interface Meeting {
   start: string;
   url: string | null;
   notes: string | null;
+  tags: string[];
   closed: boolean;
   createdAt: number;
 }

@@ -7,12 +7,12 @@ const Stats = {
     }
     statsEl.classList.remove('hidden');
 
-    let pauseMs = 0, workMs = 0, meetMs = 0;
+    let breakMs = 0, workMs = 0, meetMs = 0;
     let startMin = null, endMax = null;
 
     for (const e of dayEntries) {
       const d = durationForDay(e, selectedDay);
-      if (e.type === 'pause') pauseMs += d;
+      if (e.type === 'break') breakMs += d;
       else if (e.type === 'work') workMs += d;
       else if (e.type === 'meeting') meetMs += d;
 
@@ -24,7 +24,7 @@ const Stats = {
 
     statsEl.innerHTML =
       '<table>' +
-        '<tr><td>Pause</td><td>' + formatDuration(pauseMs) + '</td></tr>' +
+        '<tr><td>Break</td><td>' + formatDuration(breakMs) + '</td></tr>' +
         '<tr><td>Work</td><td>' + formatDuration(workMs) + '</td></tr>' +
         '<tr><td>Meetings</td><td>' + formatDuration(meetMs) + '</td></tr>' +
         '<tr><td>Started</td><td>' + (startMin != null ? formatTimeMs(startMin) : '\u2013') + '</td></tr>' +

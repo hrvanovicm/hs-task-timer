@@ -34,16 +34,14 @@ const Form = {
     return document.getElementById(id).value;
   },
 
-  render(view, title, body, buttons, back) {
+  render(view, title, body, buttons) {
     this.enter(view);
     view.innerHTML =
-      '<div class="back-row"><button id="back" class="secondary">Back</button></div>' +
       '<div class="detail-title">' + escapeHtml(title) + '</div>' +
       body +
       '<div class="form-actions">' +
         buttons.map((b) => '<button id="' + b.id + '" class="' + (b.cls || '') + '">' + b.label + '</button>').join('') +
       '</div>';
-    document.getElementById('back').addEventListener('click', back);
     for (const b of buttons) {
       document.getElementById(b.id).addEventListener('click', b.onClick);
     }

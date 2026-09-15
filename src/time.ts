@@ -7,6 +7,11 @@ export function dayKey(date: Date = new Date()): string {
   return `${y}-${m}-${d}`;
 }
 
+export function nextDayKey(day: string): string {
+  const [y, m, d] = day.split('-').map(Number);
+  return dayKey(new Date(y, m - 1, d + 1));
+}
+
 export function formatDuration(ms: number): string {
   const minutes = Math.floor(ms / 60000);
   if (minutes < 1) {

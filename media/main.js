@@ -6,6 +6,11 @@ tabCurrentBtn.addEventListener('click', () => Tabs.showCurrent());
 tabListBtn.addEventListener('click', () => Tabs.showList());
 
 dueListEl.addEventListener('click', (event) => {
+  const btn = event.target.closest('button[data-action]');
+  if (btn && btn.dataset.action === 'openUrl') {
+    post({ type: 'openUrl', url: btn.dataset.url });
+    return;
+  }
   const row = event.target.closest('.due-row');
   if (!row) return;
   if (row.dataset.kind === 'meeting') ItemForm.editMeeting(row.dataset.id);
@@ -42,7 +47,9 @@ listItemsEl.addEventListener('click', (event) => {
     const action = btn.dataset.action;
     const kind = btn.dataset.kind;
     const id = btn.dataset.id;
-    if (action === 'closeItem') {
+    if (action === 'openUrl') {
+      post({ type: 'openUrl', url: btn.dataset.url });
+    } else if (action === 'closeItem') {
       post({ type: kind === 'task' ? 'setTaskClosed' : 'setMeetingClosed', id, closed: true });
     } else if (action === 'uncloseItem') {
       post({ type: kind === 'task' ? 'setTaskClosed' : 'setMeetingClosed', id, closed: false });
@@ -63,7 +70,10 @@ currentInputEl.addEventListener('blur', () => {
   setTimeout(() => Tracker.hideComboList(), 150);
 });
 document.addEventListener('click', (event) => {
-  if (!event.target.closest('.combobox')) Tracker.hideComboList();
+  if (!event.target.closest('.combobox')) {
+    Tracker.hideComboList();
+    document.querySelectorAll('.combo-list').forEach((el) => el.classList.add('hidden'));
+  }
 });
 
 clearBtnEl.addEventListener('click', () => {
@@ -73,7 +83,7 @@ clearBtnEl.addEventListener('click', () => {
   Tracker.updateUi();
 });
 
-pauseBtnEl.addEventListener('click', () => {
+breakBtnEl.addEventListener('click', () => {
   if (pausing) {
     post({ type: 'stop' });
     if (selectedItem && selectedItem.kind === 'task') {
@@ -84,7 +94,7 @@ pauseBtnEl.addEventListener('click', () => {
     pausing = false;
   } else {
     pausing = true;
-    post({ type: 'start', kind: 'pause', name: 'Pause' });
+    post({ type: 'start', kind: 'break', name: 'Break' });
   }
   Tracker.updateUi();
 });

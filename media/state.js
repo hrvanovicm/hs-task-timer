@@ -62,6 +62,18 @@ function isMeetingOpen(meetingId) {
   return !!m && !m.closed;
 }
 
+function entryTags(e) {
+  if (e.type === 'work' && e.taskId) {
+    const t = tasks.find((x) => x.id === e.taskId);
+    if (t) return Array.isArray(t.tags) ? t.tags : [];
+  }
+  if (e.type === 'meeting' && e.meetingId) {
+    const m = meetings.find((x) => x.id === e.meetingId);
+    if (m) return Array.isArray(m.tags) ? m.tags : [];
+  }
+  return [];
+}
+
 function combinedItems() {
   const items = [];
   for (const t of tasks) items.push({ kind: 'task', obj: t });
@@ -89,26 +101,28 @@ function itemSubLine(it) {
   const o = it.obj;
   const parts = [];
   if (it.kind === 'task') {
-    if (o.deadline) parts.push(o.deadline);
+    if (o.deadline) parts.push(formatDate(o.deadline));
     if (o.estimate) parts.push(o.estimate + ' est');
   } else {
-    if (o.start) parts.push(o.start.replace('T', ' '));
+    if (o.start) parts.push(formatDate(o.start));
   }
   return parts.join(' \u00b7 ');
 }
 
 function taskSelectOptions() {
-  return openTasks()
-    .slice()
-    .sort((a, b) => a.name.localeCompare(b.name))
-    .map((t) => '<option value="' + escapeHtml(t.id) + '">' + escapeHtml(t.name) + '</option>')
-    .join('');
+  return '<option value="">-- none --</option>' +
+    openTasks()
+      .slice()
+      .sort((a, b) => a.name.localeCompare(b.name))
+      .map((t) => '<option value="' + escapeHtml(t.id) + '">' + escapeHtml(t.name) + '</option>')
+      .join('');
 }
 
 function meetingSelectOptions() {
-  return openMeetings()
-    .slice()
-    .sort((a, b) => a.name.localeCompare(b.name))
-    .map((m) => '<option value="' + escapeHtml(m.id) + '">' + escapeHtml(m.name) + '</option>')
-    .join('');
+  return '<option value="">-- none --</option>' +
+    openMeetings()
+      .slice()
+      .sort((a, b) => a.name.localeCompare(b.name))
+      .map((m) => '<option value="' + escapeHtml(m.id) + '">' + escapeHtml(m.name) + '</option>')
+      .join('');
 }

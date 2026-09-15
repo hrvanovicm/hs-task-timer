@@ -39,6 +39,20 @@ function formatTimeMs(ms) {
   return pad(d.getHours()) + ':' + pad(d.getMinutes());
 }
 
+const MONTH_ABBR = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
+
+function formatDate(value) {
+  if (!value) return '';
+  const s = String(value);
+  const m = s.match(/^(\d{4})-(\d{2})-(\d{2})(?:T(\d{2}:\d{2}))?/);
+  if (!m) return s;
+  const day = Number(m[3]);
+  const month = MONTH_ABBR[Number(m[2]) - 1] || m[2];
+  let out = day + '. ' + month + ' ' + m[1];
+  if (m[4]) out += ' ' + m[4];
+  return out;
+}
+
 function durationForDay(entry, day) {
   const start = parseLocal(entry.from);
   const end = entry.to ? parseLocal(entry.to) : Date.now();
@@ -53,4 +67,25 @@ function escapeHtml(value) {
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;');
+}
+
+function parseTags(value) {
+  return String(value || '')
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
+
+function tagBadgesHtml(tags) {
+  const list = Array.isArray(tags) ? tags : [];
+  if (list.length === 0) return '';
+  return (
+    '<span class="tags">' +
+    list.map((t) => '<span class="tag" title="' + escapeHtml(t) + '">' + escapeHtml(t) + '</span>').join('') +
+    '</span>'
+  );
+}
+
+function itemTooltip(o) {
+  return [o.name, o.notes].filter(Boolean).join(' \u00b7 ');
 }

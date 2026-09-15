@@ -17,6 +17,7 @@
     "onStartupFinished"
   ],
   "main": "./out/extension.js",
+  "extensionKind": ["ui"],
   "contributes": {
     "viewsContainers": {
       "activitybar": [
@@ -46,8 +47,8 @@
         "title": "Task Timer: Start General Work"
       },
       {
-        "command": "hsTaskTimer.newPause",
-        "title": "Task Timer: Start Pause"
+        "command": "hsTaskTimer.newBreak",
+        "title": "Task Timer: Start Break"
       }
     ]
   },

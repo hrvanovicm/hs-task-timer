@@ -7,11 +7,11 @@ const Tracker = {
   updateUi() {
     currentInputEl.disabled = pausing;
     if (pausing) {
-      currentInputEl.value = 'Pause';
+      currentInputEl.value = 'Break';
     } else if (document.activeElement !== currentInputEl) {
       currentInputEl.value = selectedItem ? selectedItem.name : '';
     }
-    pauseBtnEl.textContent = pausing ? 'Stop pause' : 'Pause';
+    breakBtnEl.textContent = pausing ? 'Stop break' : 'Start break';
   },
 
   syncState() {
@@ -19,7 +19,7 @@ const Tracker = {
     if (!cur) {
       selectedItem = null;
       pausing = false;
-    } else if (cur.type === 'pause') {
+    } else if (cur.type === 'break') {
       pausing = true;
     } else if (cur.taskId) {
       pausing = false;
@@ -43,26 +43,37 @@ const Tracker = {
       selectedItem = { kind: 'meeting', id: opt.meetingId, name: opt.label };
       pausing = false;
       post({ type: 'startMeeting', meetingId: opt.meetingId });
+    } else if (opt.action === 'newTask') {
+      post({ type: 'startNewTask', name: opt.name });
+    } else if (opt.action === 'newMeeting') {
+      post({ type: 'startNewMeeting', name: opt.name });
     }
-    currentInputEl.value = selectedItem ? selectedItem.name : '';
+    currentInputEl.value = selectedItem ? selectedItem.name : (opt.name || '');
     currentInputEl.blur();
     this.updateUi();
   },
 
   showComboList(filter) {
-    const q = (filter || '').trim().toLowerCase();
+    const q = (filter || '').trim();
+    const lq = q.toLowerCase();
     const items = [];
 
     items.push({ head: true, label: 'Tasks' });
-    const taskMatches = openTasksSorted().filter((t) => !q || t.name.toLowerCase().indexOf(q) !== -1);
+    const taskMatches = openTasksSorted().filter((t) => !lq || (t.name + ' ' + (Array.isArray(t.tags) ? t.tags.join(' ') : '')).toLowerCase().indexOf(lq) !== -1);
     for (const t of taskMatches) {
       items.push({ label: t.name, action: 'task', taskId: t.id, cls: deadlineClass(t.deadline) });
     }
+    if (taskMatches.length === 0) {
+      items.push({ label: '+ add task' + (q ? ' "' + q + '"' : ''), action: 'newTask', name: q, cls: 'add' });
+    }
 
     items.push({ head: true, label: 'Meetings' });
-    const meetingMatches = openMeetingsSorted().filter((m) => !q || m.name.toLowerCase().indexOf(q) !== -1);
+    const meetingMatches = openMeetingsSorted().filter((m) => !lq || (m.name + ' ' + (Array.isArray(m.tags) ? m.tags.join(' ') : '')).toLowerCase().indexOf(lq) !== -1);
     for (const m of meetingMatches) {
       items.push({ label: m.name, action: 'meeting', meetingId: m.id });
+    }
+    if (meetingMatches.length === 0) {
+      items.push({ label: '+ add meeting' + (q ? ' "' + q + '"' : ''), action: 'newMeeting', name: q, cls: 'add' });
     }
 
     comboListEl.innerHTML = '';

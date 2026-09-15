@@ -7,10 +7,10 @@ import { EntryInput, SidebarProvider, WebviewMessage } from './sidebar';
 import { StatusBar } from './statusBar';
 import { Storage } from './storage';
 import { dayKey, formatDuration, nowLocal, parseLocalDateTime } from './time';
-import { EntryType } from './types';
+import { Entry, EntryType } from './types';
 
 interface PickItem extends vscode.QuickPickItem {
-  action: 'stop' | 'general' | 'pause' | 'task' | 'meeting';
+  action: 'stop' | 'general' | 'break' | 'task' | 'meeting';
   id?: string;
 }
 
@@ -73,6 +73,17 @@ export function activate(context: vscode.ExtensionContext): void {
     refresh();
   }
 
+  function resumeLast(predicate: (entry: Entry) => boolean, now: string): boolean {
+    const last = storage.entries[storage.entries.length - 1];
+    if (last && last.to === now && predicate(last)) {
+      storage.updateEntry(last.id, { to: null });
+      storage.setCurrentId(last.id);
+      refresh();
+      return true;
+    }
+    return false;
+  }
+
   function start(kind: EntryType, name: string): void {
     const entry = storage.current();
 
@@ -87,6 +98,15 @@ export function activate(context: vscode.ExtensionContext): void {
       return;
     }
 
+    const now = nowLocal();
+
+    if (
+      kind === 'break' &&
+      resumeLast((e) => e.type === 'break' && e.taskId == null && e.meetingId == null, now)
+    ) {
+      return;
+    }
+
     stopCurrent();
 
     const created = storage.addEntry({
@@ -94,7 +114,7 @@ export function activate(context: vscode.ExtensionContext): void {
       name: name.trim() || kind,
       url: null,
       notes: null,
-      from: nowLocal(),
+      from: now,
       to: null,
       taskId: null,
       meetingId: null,
@@ -112,6 +132,10 @@ export function activate(context: vscode.ExtensionContext): void {
 
     const entry = storage.current();
     if (entry && entry.to == null && entry.taskId === taskId) {
+      return;
+    }
+
+    if (resumeLast((e) => e.type === 'work' && e.taskId === taskId, nowLocal())) {
       return;
     }
 
@@ -141,6 +165,10 @@ export function activate(context: vscode.ExtensionContext): void {
 
     const entry = storage.current();
     if (entry && entry.to == null && entry.meetingId === meetingId) {
+      return;
+    }
+
+    if (resumeLast((e) => e.type === 'meeting' && e.meetingId === meetingId, nowLocal())) {
       return;
     }
 
@@ -222,17 +250,44 @@ export function activate(context: vscode.ExtensionContext): void {
       case 'startMeeting':
         startMeeting(message.meetingId);
         return;
+      case 'startNewTask': {
+        const task = storage.addTask({
+          name: message.name.trim() || 'Task',
+          branch: null,
+          deadline: null,
+          estimate: null,
+          url: null,
+          notes: null,
+          tags: [],
+          closed: false,
+        });
+        startTask(task.id);
+        return;
+      }
+      case 'startNewMeeting': {
+        const meeting = storage.addMeeting({
+          name: message.name.trim() || 'Meeting',
+          start: nowLocal(),
+          url: null,
+          notes: null,
+          tags: [],
+          closed: false,
+        });
+        startMeeting(meeting.id);
+        return;
+      }
       case 'stop':
         stopCurrent();
         return;
       case 'addTask':
         storage.addTask({
           name: message.name,
-          branch: message.branch || currentBranchName,
+          branch: message.branch || null,
           deadline: message.deadline ?? null,
           estimate: message.estimate ?? null,
           url: message.url ?? null,
           notes: message.notes ?? null,
+          tags: message.tags ?? [],
           closed: false,
         });
         refresh();
@@ -254,6 +309,7 @@ export function activate(context: vscode.ExtensionContext): void {
           start: message.start ?? '',
           url: message.url ?? null,
           notes: message.notes ?? null,
+          tags: message.tags ?? [],
           closed: false,
         });
         refresh();
@@ -282,7 +338,6 @@ export function activate(context: vscode.ExtensionContext): void {
               name: message.patch.name ?? task.name,
               branch: message.branch ?? task.branch,
               url: message.patch.url ?? task.url,
-              notes: message.patch.notes ?? task.notes,
             });
           }
         }
@@ -314,6 +369,22 @@ export function activate(context: vscode.ExtensionContext): void {
     }
   }
 
+  function tagsForEntry(e: Entry): string[] {
+    if (e.taskId) {
+      const task = storage.findTaskById(e.taskId);
+      if (task) {
+        return task.tags ?? [];
+      }
+    }
+    if (e.meetingId) {
+      const meeting = storage.findMeetingById(e.meetingId);
+      if (meeting) {
+        return meeting.tags ?? [];
+      }
+    }
+    return [];
+  }
+
   async function exportCsv(day: string): Promise<void> {
     const folders = await vscode.window.showOpenDialog({
       canSelectFolders: true,
@@ -329,9 +400,9 @@ export function activate(context: vscode.ExtensionContext): void {
       .filter((e) => e.from.slice(0, 10) === day)
       .sort((a, b) => a.from.localeCompare(b.from) || a.createdAt - b.createdAt);
 
-    const rows = [['type', 'name', 'from', 'to', 'url', 'notes']];
+    const rows = [['type', 'name', 'tags', 'from', 'to', 'url', 'notes']];
     for (const e of items) {
-      rows.push([e.type, e.name, e.from, e.to ?? '', e.url ?? '', e.notes ?? '']);
+      rows.push([e.type, e.name, tagsForEntry(e).join(' '), e.from, e.to ?? '', e.url ?? '', e.notes ?? '']);
     }
     const csv = rows.map((row) => row.map(csvEscape).join(',')).join('\n');
 
@@ -344,7 +415,7 @@ export function activate(context: vscode.ExtensionContext): void {
     const items: PickItem[] = [
       { label: '$(circle-slash) No tracking', action: 'stop' },
       { label: `$(play) ${ACTIVITIES.generalWork}`, action: 'general' },
-      { label: `$(debug-pause) ${ACTIVITIES.pause}`, action: 'pause' },
+      { label: `$(debug-pause) ${ACTIVITIES.break}`, action: 'break' },
     ];
     for (const task of storage.openTasks()) {
       items.push({ label: `Work: ${task.name}`, action: 'task', id: task.id });
@@ -364,8 +435,8 @@ export function activate(context: vscode.ExtensionContext): void {
       case 'general':
         start('work', ACTIVITIES.generalWork);
         return;
-      case 'pause':
-        start('pause', ACTIVITIES.pause);
+      case 'break':
+        start('break', ACTIVITIES.break);
         return;
       case 'task':
         if (pick.id) {
@@ -400,7 +471,7 @@ export function activate(context: vscode.ExtensionContext): void {
       return;
     }
 
-    const [branch, all] = await Promise.all([currentBranch(root), listBranches(root)]);
+    const [branch, all] = await Promise.all([currentBranch(), listBranches()]);
 
     if (!arraysEqual(all, branchList)) {
       branchList = all;
@@ -422,18 +493,29 @@ export function activate(context: vscode.ExtensionContext): void {
     }
   }
 
+  function handleTick(): void {
+    const entry = storage.current();
+    if (entry && entry.to == null && entry.from.slice(0, 10) !== dayKey()) {
+      storage.splitMidnight(dayKey());
+      refresh();
+      return;
+    }
+    updateStatusBar();
+  }
+
   context.subscriptions.push(
     vscode.window.registerWebviewViewProvider(SidebarProvider.viewType, sidebar),
     vscode.commands.registerCommand(COMMAND_IDS.switchTask, () => void pickTask()),
     vscode.commands.registerCommand(COMMAND_IDS.newWork, () => start('work', ACTIVITIES.generalWork)),
-    vscode.commands.registerCommand(COMMAND_IDS.newPause, () => start('pause', ACTIVITIES.pause)),
+    vscode.commands.registerCommand(COMMAND_IDS.newBreak, () => start('break', ACTIVITIES.break)),
     statusBar,
   );
 
+  storage.splitMidnight(dayKey());
   refresh();
   void syncBranch();
   const poll = setInterval(() => void syncBranch(), BRANCH_POLL_MS);
-  const tick = setInterval(updateStatusBar, 1000);
+  const tick = setInterval(handleTick, 1000);
   context.subscriptions.push({ dispose: () => clearInterval(poll) });
   context.subscriptions.push({ dispose: () => clearInterval(tick) });
 }

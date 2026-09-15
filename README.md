@@ -10,8 +10,8 @@ I'm lazy about adding time logs to Jira by hand. Instead, I export the day to CS
 
 ## Features
 
-- Track time on tasks, meetings, general work, and pauses
-- Sidebar with a "Current" view and a "List" view
+- Track time on tasks, meetings, general work, and breaks
+- Sidebar with a "Today" view and a "Tasks" view
 - Status bar shows the current task and elapsed time
 - Git branch detection with a prompt to pick a task when you switch branches
 - Deadlines and estimates, with a "due today / overdue" list
@@ -27,7 +27,7 @@ Commands:
 
 - `Task Timer: Switch Task` — pick what to track
 - `Task Timer: Start General Work` — start tracking general work
-- `Task Timer: Start Pause` — start a pause
+- `Task Timer: Start Break` — start a break
 
 ## Todo
 

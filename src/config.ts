@@ -8,12 +8,12 @@ export const VIEW_TYPE = 'taskTimer.view';
 export const COMMAND_IDS = {
   switchTask: 'hsTaskTimer.switchTask',
   newWork: 'hsTaskTimer.newWork',
-  newPause: 'hsTaskTimer.newPause',
+  newBreak: 'hsTaskTimer.newBreak',
 } as const;
 
 export const BRANCH_POLL_MS = 5000;
 
 export const ACTIVITIES = {
   generalWork: 'General work',
-  pause: 'Pause',
+  break: 'Break',
 } as const;

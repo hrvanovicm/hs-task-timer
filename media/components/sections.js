@@ -1,5 +1,5 @@
 const GROUPS = [
-  { type: 'pause', title: 'Pauses' },
+  { type: 'break', title: 'Breaks' },
   { type: 'work', title: 'Work' },
   { type: 'meeting', title: 'Meetings' },
 ];
@@ -33,7 +33,8 @@ const Sections = {
     const running = e.to == null;
     const dur = durationForDay(e, selectedDay);
     const range = formatTime(e.from) + ' \u2013 ' + (running ? 'now' : formatTime(e.to));
-    const tooltip = [e.notes, e.url].filter(Boolean).join(' \u00b7 ');
+    const badges = tagBadgesHtml(entryTags(e));
+    const tooltip = [e.name, e.notes, e.url].filter(Boolean).join(' \u00b7 ');
     const titleAttr = tooltip ? ' title="' + escapeHtml(tooltip) + '"' : '';
     const urlBtn = e.url
       ? '<button class="icon-btn" data-action="openUrl" data-id="' + escapeHtml(e.id) + '" title="Open ' + escapeHtml(e.url) + '">\u2197</button>'
@@ -53,6 +54,7 @@ const Sections = {
           urlBtn + closeBtn + delBtn +
         '</div>' +
         '<div class="entry-line2">' + range + '</div>' +
+        (badges ? '<div class="entry-tags">' + badges + '</div>' : '') +
       '</div>'
     );
   },

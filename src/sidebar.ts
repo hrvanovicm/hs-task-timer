@@ -28,12 +28,14 @@ export type WebviewMessage =
   | { type: 'start'; kind: EntryType; name: string; url?: string; notes?: string }
   | { type: 'startTask'; taskId: string }
   | { type: 'startMeeting'; meetingId: string }
+  | { type: 'startNewTask'; name: string }
+  | { type: 'startNewMeeting'; name: string }
   | { type: 'stop' }
-  | { type: 'addTask'; name: string; branch?: string | null; deadline?: string | null; estimate?: string | null; url?: string | null; notes?: string | null }
+  | { type: 'addTask'; name: string; branch?: string | null; deadline?: string | null; estimate?: string | null; url?: string | null; notes?: string | null; tags?: string[] }
   | { type: 'updateTask'; id: string; patch: Partial<Task> }
   | { type: 'setTaskClosed'; id: string; closed: boolean }
   | { type: 'deleteTask'; id: string }
-  | { type: 'addMeeting'; name: string; start?: string; url?: string | null; notes?: string | null }
+  | { type: 'addMeeting'; name: string; start?: string; url?: string | null; notes?: string | null; tags?: string[] }
   | { type: 'updateMeeting'; id: string; patch: Partial<Meeting> }
   | { type: 'setMeetingClosed'; id: string; closed: boolean }
   | { type: 'deleteMeeting'; id: string }
@@ -117,6 +119,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
       'state',
       'dom',
       'components/form',
+      'components/branch',
       'components/tabs',
       'components/tracker',
       'components/due',
