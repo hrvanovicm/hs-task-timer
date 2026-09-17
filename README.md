@@ -1,5 +1,7 @@
 <img src="images/logo.png" alt="HS Task Timer" width="64" align="right">
 
+[![Build](https://github.com/hrvanovicm/hs-task-timer/actions/workflows/build.yml/badge.svg)](https://github.com/hrvanovicm/hs-task-timer/actions/workflows/build.yml)
+
 # HS Task Timer
 
 Track time spent on tasks and meetings, right inside VS Code. Still in beta.

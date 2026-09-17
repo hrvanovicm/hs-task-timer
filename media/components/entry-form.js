@@ -3,24 +3,15 @@ const EntryForm = {
     const entry = entries.find((e) => e.id === id);
     if (!entry) return;
 
-    const isManual = entry.type !== 'work';
     const task = entry.type === 'work' && entry.taskId ? tasks.find((t) => t.id === entry.taskId) : null;
     const anchor = entry.from.slice(0, 10) || selectedDay;
     const back = () => Tabs.showCurrent();
 
     let body = '';
-    if (entry.type === 'work') {
-      const toText = entry.to
-        ? (entry.to.slice(0, 10) === entry.from.slice(0, 10) ? formatTime(entry.to) : formatDate(entry.to))
-        : 'now';
-      body += Form.field('Time', '<span class="meta">' + escapeHtml(formatDate(entry.from)) + ' \u2013 ' + escapeHtml(toText) + '</span>');
-    }
+    body += Form.field('From (' + formatDate(anchor) + ')', Form.input('f-from', formatTime(entry.from), { type: 'time' }));
+    body += Form.field('To (' + formatDate(anchor) + ')', Form.input('f-to', entry.to ? formatTime(entry.to) : '', { type: 'time' }), entry.to == null ? 'Leave empty to keep running.' : '');
     body += Form.field('Title', Form.input('f-name', entry.name));
     if (task) body += Form.field('Branch', BranchAutocomplete.field(task.branch));
-    if (isManual) {
-      body += Form.field('From (' + formatDate(anchor) + ')', Form.input('f-from', formatTime(entry.from), { type: 'time' }));
-      body += Form.field('To (' + formatDate(anchor) + ')', Form.input('f-to', entry.to ? formatTime(entry.to) : '', { type: 'time' }), entry.to == null ? 'Leave empty to keep running.' : '');
-    }
     body += Form.field('URL', Form.input('f-url', entry.url));
     body += Form.field('Notes', Form.textarea('f-notes', entry.notes));
 
@@ -39,13 +30,13 @@ const EntryForm = {
     function save() {
       const name = Form.read('f-name').trim();
       if (!name) return;
-      const patch = { name };
-      if (isManual) {
-        const fromTime = Form.read('f-from');
-        const toTime = Form.read('f-to');
-        patch.from = fromTime ? anchor + 'T' + fromTime : entry.from;
-        patch.to = toTime ? anchor + 'T' + toTime : null;
-      }
+      const fromTime = Form.read('f-from');
+      const toTime = Form.read('f-to');
+      const patch = {
+        name,
+        from: fromTime ? anchor + 'T' + fromTime : entry.from,
+        to: toTime ? anchor + 'T' + toTime : null,
+      };
       patch.url = Form.read('f-url').trim();
       patch.notes = Form.read('f-notes');
       const msg = { type: 'updateEntry', id: entry.id, patch };
@@ -70,7 +61,9 @@ const EntryForm = {
       'Add ' + type,
       nameField +
         Form.field('From (' + formatDate(selectedDay) + ')', Form.input('f-from', now, { type: 'time' })) +
-        Form.field('To (' + formatDate(selectedDay) + ')', Form.input('f-to', now, { type: 'time' })),
+        Form.field('To (' + formatDate(selectedDay) + ')', Form.input('f-to', now, { type: 'time' })) +
+        Form.field('URL', Form.input('f-url', '')) +
+        Form.field('Notes', Form.textarea('f-notes', '')),
       [
         { id: 'cancel', cls: 'secondary', label: 'Cancel', onClick: back },
         { id: 'save', label: 'Add', onClick: save },
@@ -101,6 +94,8 @@ const EntryForm = {
           meetingId,
           from: from ? selectedDay + 'T' + from : null,
           to: to ? selectedDay + 'T' + to : null,
+          url: Form.read('f-url').trim() || null,
+          notes: Form.read('f-notes') || null,
         },
       });
       back();

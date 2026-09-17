@@ -1,10 +1,10 @@
 const KIND_CAP = { task: 'Task', meeting: 'Meeting' };
 
 const ItemForm = {
-  render(kind, item) {
+  render(kind, item, backTo) {
     const Cap = KIND_CAP[kind];
     const edit = !!item;
-    const back = () => Tabs.showList();
+    const back = () => (backTo === 'current' ? Tabs.showCurrent() : Tabs.showList());
 
     const buttons = edit ? [
       { id: 'delete', cls: 'danger', label: 'Delete', onClick: () => { post({ type: 'delete' + Cap, id: item.id }); back(); } },
@@ -73,13 +73,13 @@ const ItemForm = {
   task() { this.render('task'); },
   meeting() { this.render('meeting'); },
 
-  editTask(id) {
+  editTask(id, backTo) {
     const task = tasks.find((t) => t.id === id);
-    if (task) this.render('task', task);
+    if (task) this.render('task', task, backTo);
   },
 
-  editMeeting(id) {
+  editMeeting(id, backTo) {
     const meeting = meetings.find((m) => m.id === id);
-    if (meeting) this.render('meeting', meeting);
+    if (meeting) this.render('meeting', meeting, backTo);
   },
 };

@@ -33,6 +33,7 @@ export function activate(context: vscode.ExtensionContext): void {
       dayKey(),
       currentBranchName,
       branchList,
+      storage.exportContext,
     );
   }
 
@@ -71,6 +72,14 @@ export function activate(context: vscode.ExtensionContext): void {
 
     storage.setCurrentId(null);
     refresh();
+  }
+
+  function stopCurrentSilent(): void {
+    const entry = storage.current();
+    if (entry && entry.to == null) {
+      storage.updateEntry(entry.id, { to: nowLocal() });
+    }
+    storage.setCurrentId(null);
   }
 
   function resumeLast(predicate: (entry: Entry) => boolean, now: string): boolean {
@@ -358,6 +367,9 @@ export function activate(context: vscode.ExtensionContext): void {
       case 'exportCsv':
         void exportCsv(message.day);
         return;
+      case 'setExportContext':
+        storage.setExportContext(message.context);
+        return;
     }
   }
 
@@ -385,6 +397,16 @@ export function activate(context: vscode.ExtensionContext): void {
     return [];
   }
 
+  function estimateForEntry(e: Entry): string {
+    if (e.taskId) {
+      const task = storage.findTaskById(e.taskId);
+      if (task) {
+        return task.estimate ?? '';
+      }
+    }
+    return '';
+  }
+
   async function exportCsv(day: string): Promise<void> {
     const folders = await vscode.window.showOpenDialog({
       canSelectFolders: true,
@@ -400,9 +422,9 @@ export function activate(context: vscode.ExtensionContext): void {
       .filter((e) => e.from.slice(0, 10) === day)
       .sort((a, b) => a.from.localeCompare(b.from) || a.createdAt - b.createdAt);
 
-    const rows = [['type', 'name', 'tags', 'from', 'to', 'url', 'notes']];
+    const rows = [['type', 'name', 'estimate', 'tags', 'from', 'to', 'url', 'notes']];
     for (const e of items) {
-      rows.push([e.type, e.name, tagsForEntry(e).join(' '), e.from, e.to ?? '', e.url ?? '', e.notes ?? '']);
+      rows.push([e.type, e.name, estimateForEntry(e), tagsForEntry(e).join(' '), e.from, e.to ?? '', e.url ?? '', e.notes ?? '']);
     }
     const csv = rows.map((row) => row.map(csvEscape).join(',')).join('\n');
 
@@ -446,6 +468,50 @@ export function activate(context: vscode.ExtensionContext): void {
       case 'meeting':
         if (pick.id) {
           startMeeting(pick.id);
+        }
+        return;
+    }
+  }
+
+  async function showStatusMenu(): Promise<void> {
+    const today = dayKey();
+    const todayTaskIds = new Set<string>();
+    for (const e of storage.entries) {
+      if (e.from.slice(0, 10) === today && e.taskId) {
+        todayTaskIds.add(e.taskId);
+      }
+    }
+    const todayTasks = storage.tasks.filter((t) => todayTaskIds.has(t.id) && !t.closed);
+
+    const items: (vscode.QuickPickItem & { action?: string; id?: string })[] = [
+      { label: `$(debug-pause) ${ACTIVITIES.break}`, action: 'break' },
+      { label: `$(play) ${ACTIVITIES.generalWork}`, action: 'general' },
+      { label: '$(circle-slash) Stop all', action: 'stop' },
+    ];
+    if (todayTasks.length > 0) {
+      items.push({ label: '', kind: vscode.QuickPickItemKind.Separator });
+      for (const t of todayTasks) {
+        items.push({ label: `$(play) Start ${t.name}`, action: 'task', id: t.id });
+      }
+    }
+
+    const pick = await vscode.window.showQuickPick(items, { placeHolder: DISPLAY_NAME });
+    if (!pick || !pick.action) {
+      return;
+    }
+    switch (pick.action) {
+      case 'break':
+        start('break', ACTIVITIES.break);
+        return;
+      case 'general':
+        start('work', ACTIVITIES.generalWork);
+        return;
+      case 'stop':
+        stopCurrent();
+        return;
+      case 'task':
+        if (pick.id) {
+          startTask(pick.id);
         }
         return;
     }
@@ -508,6 +574,7 @@ export function activate(context: vscode.ExtensionContext): void {
     vscode.commands.registerCommand(COMMAND_IDS.switchTask, () => void pickTask()),
     vscode.commands.registerCommand(COMMAND_IDS.newWork, () => start('work', ACTIVITIES.generalWork)),
     vscode.commands.registerCommand(COMMAND_IDS.newBreak, () => start('break', ACTIVITIES.break)),
+    vscode.commands.registerCommand(COMMAND_IDS.statusMenu, () => void showStatusMenu()),
     statusBar,
   );
 
@@ -518,6 +585,7 @@ export function activate(context: vscode.ExtensionContext): void {
   const tick = setInterval(handleTick, 1000);
   context.subscriptions.push({ dispose: () => clearInterval(poll) });
   context.subscriptions.push({ dispose: () => clearInterval(tick) });
+  context.subscriptions.push({ dispose: stopCurrentSilent });
 }
 
 function arraysEqual(a: string[], b: string[]): boolean {

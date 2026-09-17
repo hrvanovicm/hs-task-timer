@@ -30,6 +30,10 @@ sectionsEl.addEventListener('click', (event) => {
     } else if (action === 'closeMeeting') {
       const entry = entries.find((e) => e.id === btn.dataset.id);
       if (entry && entry.meetingId) post({ type: 'setMeetingClosed', id: entry.meetingId, closed: true });
+    } else if (action === 'editTask') {
+      ItemForm.editTask(btn.dataset.id, 'current');
+    } else if (action === 'editMeeting') {
+      ItemForm.editMeeting(btn.dataset.id, 'current');
     } else if (action === 'delete') {
       post({ type: 'deleteEntry', id: btn.dataset.id });
     } else if (action === 'add') {
@@ -122,6 +126,7 @@ window.addEventListener('message', (event) => {
     today = message.today;
     currentBranch = message.currentBranch;
     branches = message.branches;
+    exportContext = message.exportContext || '';
     branchListEl.innerHTML = branches
       .map((b) => '<option value="' + escapeHtml(b) + '"></option>')
       .join('');

@@ -8,9 +8,26 @@ let currentBranch = '';
 let branches = [];
 let selectedItem = null;
 let pausing = false;
+let exportContext = '';
 
 function currentEntry() {
   return entries.find((e) => e.id === currentId) || null;
+}
+
+function resumeTarget() {
+  const cur = currentEntry();
+  if (!cur || cur.type !== 'break') return null;
+  for (let i = entries.length - 1; i >= 0; i--) {
+    const e = entries[i];
+    if (e === cur) continue;
+    if (e.type === 'work' && e.taskId && isTaskOpen(e.taskId)) {
+      return { kind: 'task', id: e.taskId, name: e.name };
+    }
+    if (e.type === 'meeting' && e.meetingId && isMeetingOpen(e.meetingId)) {
+      return { kind: 'meeting', id: e.meetingId, name: e.name };
+    }
+  }
+  return null;
 }
 
 function openTasks() {
@@ -72,6 +89,14 @@ function entryTags(e) {
     if (m) return Array.isArray(m.tags) ? m.tags : [];
   }
   return [];
+}
+
+function entryEstimate(e) {
+  if (e.taskId) {
+    const t = tasks.find((x) => x.id === e.taskId);
+    if (t && t.estimate) return t.estimate;
+  }
+  return '';
 }
 
 function combinedItems() {

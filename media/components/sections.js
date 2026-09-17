@@ -39,11 +39,11 @@ const Sections = {
     const urlBtn = e.url
       ? '<button class="icon-btn" data-action="openUrl" data-id="' + escapeHtml(e.id) + '" title="Open ' + escapeHtml(e.url) + '">\u2197</button>'
       : '';
-    let closeBtn = '';
-    if (e.type === 'work' && e.taskId && isTaskOpen(e.taskId)) {
-      closeBtn = '<button class="icon-btn" data-action="closeTask" data-id="' + escapeHtml(e.id) + '" title="Close task">\u2713</button>';
-    } else if (e.type === 'meeting' && e.meetingId && isMeetingOpen(e.meetingId)) {
-      closeBtn = '<button class="icon-btn" data-action="closeMeeting" data-id="' + escapeHtml(e.id) + '" title="Close meeting">\u2713</button>';
+    let editBtn = '';
+    if (e.type === 'work' && e.taskId) {
+      editBtn = '<button class="icon-btn" data-action="editTask" data-id="' + escapeHtml(e.taskId) + '" title="Edit task">\u270e</button>';
+    } else if (e.type === 'meeting' && e.meetingId) {
+      editBtn = '<button class="icon-btn" data-action="editMeeting" data-id="' + escapeHtml(e.meetingId) + '" title="Edit meeting">\u270e</button>';
     }
     const delBtn = '<button class="icon-btn" data-action="delete" data-id="' + escapeHtml(e.id) + '" title="Delete">\u00d7</button>';
     return (
@@ -51,7 +51,7 @@ const Sections = {
         '<div class="entry-line1">' +
           '<span class="name">' + escapeHtml(e.name) + '</span>' +
           '<span class="time">' + formatDuration(dur) + '</span>' +
-          urlBtn + closeBtn + delBtn +
+          urlBtn + editBtn + delBtn +
         '</div>' +
         '<div class="entry-line2">' + range + '</div>' +
         (badges ? '<div class="entry-tags">' + badges + '</div>' : '') +

@@ -21,12 +21,16 @@ const Tracker = {
       pausing = false;
     } else if (cur.type === 'break') {
       pausing = true;
+      selectedItem = resumeTarget();
     } else if (cur.taskId) {
       pausing = false;
       selectedItem = { kind: 'task', id: cur.taskId, name: cur.name };
     } else if (cur.meetingId) {
       pausing = false;
       selectedItem = { kind: 'meeting', id: cur.meetingId, name: cur.name };
+    } else if (cur.type === 'work') {
+      pausing = false;
+      selectedItem = { kind: 'general', name: cur.name };
     } else {
       pausing = false;
       selectedItem = null;
@@ -47,6 +51,10 @@ const Tracker = {
       post({ type: 'startNewTask', name: opt.name });
     } else if (opt.action === 'newMeeting') {
       post({ type: 'startNewMeeting', name: opt.name });
+    } else if (opt.action === 'general') {
+      selectedItem = { kind: 'general', name: opt.name };
+      pausing = false;
+      post({ type: 'start', kind: 'work', name: opt.name });
     }
     currentInputEl.value = selectedItem ? selectedItem.name : (opt.name || '');
     currentInputEl.blur();
@@ -57,6 +65,10 @@ const Tracker = {
     const q = (filter || '').trim();
     const lq = q.toLowerCase();
     const items = [];
+
+    if (!q) {
+      items.push({ label: 'Start general work', action: 'general', name: 'General work' });
+    }
 
     items.push({ head: true, label: 'Tasks' });
     const taskMatches = openTasksSorted().filter((t) => !lq || (t.name + ' ' + (Array.isArray(t.tags) ? t.tags.join(' ') : '')).toLowerCase().indexOf(lq) !== -1);

@@ -23,9 +23,10 @@ export class Storage {
         meetings: (Array.isArray(saved.meetings) ? saved.meetings : []).map(normalizeMeeting),
         entries: Array.isArray(saved.entries) ? saved.entries : [],
         currentId: saved.currentId,
+        export_context: typeof saved.export_context === 'string' ? saved.export_context : '',
       };
     } else {
-      this.data = { tasks: [], meetings: [], entries: [], currentId: null };
+      this.data = { tasks: [], meetings: [], entries: [], currentId: null, export_context: '' };
     }
   }
 
@@ -43,6 +44,15 @@ export class Storage {
 
   get currentId(): string | null {
     return this.data.currentId;
+  }
+
+  get exportContext(): string {
+    return this.data.export_context;
+  }
+
+  setExportContext(value: string): void {
+    this.data.export_context = value;
+    this.persist();
   }
 
   setCurrentId(id: string | null) {

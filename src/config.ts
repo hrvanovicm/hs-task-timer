@@ -9,6 +9,7 @@ export const COMMAND_IDS = {
   switchTask: 'hsTaskTimer.switchTask',
   newWork: 'hsTaskTimer.newWork',
   newBreak: 'hsTaskTimer.newBreak',
+  statusMenu: 'hsTaskTimer.statusMenu',
 } as const;
 
 export const BRANCH_POLL_MS = 5000;

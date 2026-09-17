@@ -44,7 +44,8 @@ export type WebviewMessage =
   | { type: 'deleteEntry'; id: string }
   | { type: 'openUrl'; url: string }
   | { type: 'copyText'; text: string }
-  | { type: 'exportCsv'; day: string };
+  | { type: 'exportCsv'; day: string }
+  | { type: 'setExportContext'; context: string };
 
 interface UpdateMessage {
   type: 'update';
@@ -55,6 +56,7 @@ interface UpdateMessage {
   today: string;
   currentBranch: string;
   branches: string[];
+  exportContext: string;
 }
 
 export class SidebarProvider implements vscode.WebviewViewProvider {
@@ -90,6 +92,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     today: string,
     currentBranch: string,
     branches: string[],
+    exportContext: string,
   ): void {
     const message: UpdateMessage = {
       type: 'update',
@@ -100,6 +103,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
       today,
       currentBranch,
       branches,
+      exportContext,
     };
     void this.view?.webview.postMessage(message);
   }

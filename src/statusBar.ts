@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { DISPLAY_NAME } from './config';
+import { COMMAND_IDS, DISPLAY_NAME } from './config';
 
 export class StatusBar {
   private readonly item: vscode.StatusBarItem;
@@ -7,6 +7,7 @@ export class StatusBar {
   constructor() {
     this.item = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
     this.item.tooltip = DISPLAY_NAME;
+    this.item.command = COMMAND_IDS.statusMenu;
     this.item.show();
   }
 

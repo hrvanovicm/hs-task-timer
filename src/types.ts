@@ -42,4 +42,5 @@ export interface StoreData {
   meetings: Meeting[];
   entries: Entry[];
   currentId: string | null;
+  export_context: string;
 }
