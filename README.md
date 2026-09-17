@@ -6,6 +6,8 @@
 
 Track time spent on tasks and meetings, right inside VS Code. Still in beta.
 
+100% open-source. Zero telemetry, zero syncing, and your data never leaves your device.
+
 ## Why
 
 I'm lazy about adding time logs to Jira by hand. Instead, I export the day to CSV, paste the text into Jira Rovo AI, and let it log everything for me.
@@ -38,6 +40,4 @@ Commands:
 
 ## Examples
 
-![Task Timer sidebar](examples/screenshot_1.png)
-
-![Task list](examples/screenshot_2.png)
+<img src="examples/screenshot_1.png" width="25%"> <img src="examples/screenshot_2.png" width="25%"> <img src="examples/screenshot_3.png" width="25%">
