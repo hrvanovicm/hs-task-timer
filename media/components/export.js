@@ -28,16 +28,50 @@ const Export = {
     let out = 'Task Timer - ' + formatDate(day) + '\n\n';
     if (ctx) out += ctx + '\n\n';
     if (items.length === 0) return out + '(no entries)';
-    for (const e of items) {
-      const running = e.to == null;
-      const tags = entryTags(e);
-      const estimate = entryEstimate(e);
-      let line = formatTime(e.from) + ' - ' + (running ? 'now' : formatTime(e.to)) + '  ' + e.name;
-      if (estimate) line += '  (' + estimate + ' est)';
-      if (tags.length) line += '  ' + tags.map((t) => '#' + t).join(' ');
-      if (e.url) line += '  ' + e.url;
-      out += line + '\n';
+
+    for (const g of this.groupEntries(items, day)) {
+      out += g.title + '\n';
+      out += '\tTotal: ' + formatDuration(g.total) + '\n';
+      if (g.estimate) out += '\tEstimate: ' + g.estimate + '\n';
+      if (g.url) out += '\tURL: ' + g.url + '\n';
+      if (g.notes) out += '\tNotes: ' + g.notes + '\n';
+      out += '\tWork times:\n';
+      for (const e of g.entries) {
+        const running = e.to == null;
+        out += '\t\t' + formatTime(e.from) + ' - ' + (running ? 'now' : formatTime(e.to)) + '\n';
+      }
+      out += '\n';
     }
     return out;
+  },
+
+  groupEntries(items, day) {
+    const map = new Map();
+    for (const e of items) {
+      const key = this.groupKey(e);
+      if (!map.has(key)) {
+        map.set(key, { type: e.type, name: e.name, url: e.url, notes: e.notes, estimate: entryEstimate(e), entries: [] });
+      }
+      map.get(key).entries.push(e);
+    }
+    const groups = [...map.values()];
+    for (const g of groups) {
+      g.total = g.entries.reduce((sum, e) => sum + durationForDay(e, day), 0);
+      g.title = this.groupTitle(g);
+    }
+    groups.sort((a, b) => a.entries[0].from.localeCompare(b.entries[0].from));
+    return groups;
+  },
+
+  groupKey(e) {
+    if (e.type === 'work') return 'work:' + (e.taskId || e.name);
+    if (e.type === 'meeting') return 'meeting:' + (e.meetingId || e.name);
+    return 'break';
+  },
+
+  groupTitle(g) {
+    if (g.type === 'work') return 'Work: ' + g.name;
+    if (g.type === 'meeting') return 'Meeting: ' + g.name;
+    return 'Break';
   },
 };
